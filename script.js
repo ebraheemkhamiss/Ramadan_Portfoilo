@@ -231,78 +231,107 @@ skillProgressBars.forEach(bar => {
 });
 
 // ===================================
-// CONTACT FORM
+// CONTACT FORM — EmailJS Integration
 // ===================================
+
+// Initialize EmailJS with your Public Key
+emailjs.init('f603Wr61rE0ZJUCJv');
 
 const contactForm = document.getElementById('contactForm');
 
 contactForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    
-    // Get form data
-    const formData = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        subject: document.getElementById('subject').value,
-        message: document.getElementById('message').value
-    };
-    
-    // Here you would typically send the data to a server
-    // For now, we'll just show a success message
-    
-    // Create success message
-    const successMessage = document.createElement('div');
-    successMessage.style.cssText = `
+
+    // ── 1. Grab field values
+    const nameVal    = document.getElementById('name').value.trim();
+    const emailVal   = document.getElementById('email').value.trim();
+    const subjectVal = document.getElementById('subject').value.trim();
+    const messageVal = document.getElementById('message').value.trim();
+
+    // ── 2. Validate all fields are filled
+    if (!nameVal || !emailVal || !subjectVal || !messageVal) {
+        showFormNotice('⚠️ Please fill in all fields before sending.', '#f59e0b');
+        return;
+    }
+
+    // ── 3. Disable button to prevent double-click
+    const submitBtn = contactForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    // ── 4. Send via EmailJS
+    // Template variables must match what you named them in your EmailJS template:
+    //   {{from_name}}  →  nameVal
+    //   {{from_email}} →  emailVal   (used as Reply-To in template)
+    //   {{subject}}    →  subjectVal
+    //   {{message}}    →  messageVal
+    emailjs.send(
+        'service_b14neos',       // Service ID
+        'template_yqcwzuu',      // Template ID
+        {
+            from_name  : nameVal,
+            from_email : emailVal,
+            subject    : subjectVal,
+            message    : messageVal,
+            to_email   : 'ebraheemkhamiss@gmail.com'
+        }
+    )
+    .then(() => {
+        // Success
+        contactForm.reset();
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Message';
+        showFormNotice('✅ Message sent! I\'ll get back to you soon.', 'var(--primary)');
+    })
+    .catch((error) => {
+        // Failure
+        console.error('EmailJS error:', error);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Message';
+        showFormNotice('❌ Something went wrong. Please try again.', '#ef4444');
+    });
+});
+
+// Helper: show a temporary floating notice
+function showFormNotice(text, bgColor) {
+    const notice = document.createElement('div');
+    notice.style.cssText = `
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: var(--primary);
+        background-color: ${bgColor};
         color: white;
         padding: 2rem 3rem;
         border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         z-index: 10000;
         text-align: center;
+        font-size: 1.1rem;
+        font-weight: 500;
         animation: slideIn 0.3s ease;
     `;
-    successMessage.innerHTML = `
-        <h3 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Message Sent!</h3>
-        <p style="margin: 0;">Thank you for reaching out. I'll get back to you soon.</p>
-    `;
-    
-    document.body.appendChild(successMessage);
-    
-    // Add animation keyframes
+    notice.textContent = text;
+
     if (!document.getElementById('slideInAnimation')) {
         const style = document.createElement('style');
         style.id = 'slideInAnimation';
         style.textContent = `
             @keyframes slideIn {
-                from {
-                    opacity: 0;
-                    transform: translate(-50%, -60%);
-                }
-                to {
-                    opacity: 1;
-                    transform: translate(-50%, -50%);
-                }
+                from { opacity: 0; transform: translate(-50%, -60%); }
+                to   { opacity: 1; transform: translate(-50%, -50%); }
             }
         `;
         document.head.appendChild(style);
     }
-    
-    // Reset form
-    contactForm.reset();
-    
-    // Remove message after 3 seconds
+
+    document.body.appendChild(notice);
+
     setTimeout(() => {
-        successMessage.style.animation = 'slideIn 0.3s ease reverse';
-        setTimeout(() => {
-            document.body.removeChild(successMessage);
-        }, 300);
+        notice.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => document.body.removeChild(notice), 300);
     }, 3000);
-});
+}
 
 // ===================================
 // SMOOTH SCROLL
