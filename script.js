@@ -1,4 +1,4 @@
-// ===================================
+﻿// ===================================
 // THEME TOGGLE
 // ===================================
 
@@ -526,7 +526,7 @@ scrollTopBtn.innerHTML = `
 scrollTopBtn.style.cssText = `
     position: fixed;
     bottom: 2rem;
-    right: 2rem;
+    right: .5rem;
     width: 50px;
     height: 50px;
     background-color: var(--primary);
@@ -569,7 +569,6 @@ scrollTopBtn.addEventListener('mouseleave', () => {
     scrollTopBtn.style.transform = 'scale(1) translateY(0)';
     scrollTopBtn.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.3)';
 });
-
 // ===================================
 // PRELOADER (Optional)
 // ===================================
@@ -583,8 +582,7 @@ window.addEventListener('load', () => {
             preloader.style.display = 'none';
         }, 500);
     }
-    
-    // Initial animations
+// Initial animations
     document.body.style.opacity = '1';
 });
 
